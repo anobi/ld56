@@ -1,6 +1,5 @@
 #include <glad/gl.h>
-
-#include "mesh.hpp"
+#include "renderable.hpp"
 
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) 
@@ -33,6 +32,5 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
 void Mesh::Draw() 
 {
     glBindVertexArray(this->_gpu_mesh.VAO);
-
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

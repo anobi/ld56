@@ -34,7 +34,9 @@ target_link_libraries(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gl.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/mesh.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderable.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ant.cpp
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC

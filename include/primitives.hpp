@@ -1,4 +1,4 @@
-#include "mesh.hpp"
+#include "renderable.hpp"
 
 
 struct Primitive {

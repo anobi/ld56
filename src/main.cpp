@@ -7,13 +7,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "renderer.hpp"
 #include "primitives.hpp"
 #include "shader.hpp"
+#include "ant.hpp"
 
 
 int width = 800;
 int height = 600;
 GLFWwindow* window;
+
+Renderer renderer;
 
 
 void input_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -50,33 +54,29 @@ int Game()
     // Input setup
     glfwSetKeyCallback(window, input_key_callback);
 
-
     // Tringaly stuff
-    auto shader = Shader("shaders/basic.vert", "shaders/basic.frag");
-    auto plane_mesh = Mesh(plane.vertices, plane.indices);
+    auto shader = renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
+    auto plane_mesh = renderer.AddMesh(plane.vertices, plane.indices);
+
+    auto ant = Ant(plane_mesh, shader);
+
 
     auto running = true;
     while (!glfwWindowShouldClose(window)/*running*/) {
         glfwGetFramebufferSize(window, &width, &height);
-        float ratio = width / height;
+        
         glViewport(0, 0, width, height);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        auto transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.0f));
-        transform = glm::rotate(transform, (float) glfwGetTime(), glm::vec3(0, 0, 1));
-        transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
-        
-        // Apply ortho perspective
-        auto p = glm::ortho(ratio, -ratio, -1.0f, 1.0f, 1.0f, -1.0f);
-        auto mvp = p * transform;
+        renderer.UpdatePerspective(width, height);
 
-        shader.use();
-        auto tloc = glGetUniformLocation(shader.ID, "transform");
-        glUniformMatrix4fv(tloc, 1, GL_FALSE, glm::value_ptr(mvp));
+        auto scene = std::vector<RenderObject>();
+        ant.Rotate((float)glfwGetTime());
+        ant.Update();
+        scene.push_back(ant.render_obj);
 
-        plane_mesh.Draw();
+        renderer.Draw(scene);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

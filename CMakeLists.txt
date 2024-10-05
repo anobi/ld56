@@ -19,13 +19,20 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/g-truc/glm.git
   GIT_TAG        1.0.1
 )
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG        11.0.2
+)
 FetchContent_MakeAvailable(
   glfw
   glm
+  fmt
 )
 target_link_libraries(${PROJECT_NAME}
   glfw
   glm
+  fmt
 )
 
 ##################

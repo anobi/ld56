@@ -1,11 +1,13 @@
 #include <cstdio>
 #include <cstddef>
+#include <random>
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 
 #include "renderer.hpp"
 #include "primitives.hpp"
@@ -54,28 +56,38 @@ int Game()
     // Input setup
     glfwSetKeyCallback(window, input_key_callback);
 
+    srand (static_cast <unsigned> (time(0)));
+
     // Tringaly stuff
     auto shader = renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
-    auto plane_mesh = renderer.AddMesh(plane.vertices, plane.indices);
+    auto plane_mesh = renderer.AddMesh(plane_col(glm::fvec3(0.1f)).vertices, plane_col(glm::fvec3(0.1f)).indices);
+    
+    std::vector<Ant> ants;
+    for (int i = 1; i < 10; i++) {
+        static std::default_random_engine e;
+        static std::uniform_real_distribution<> dis(-1.0f, 1.0f);
 
-    auto ant = Ant(plane_mesh, shader);
-
-
+        auto ant = Ant(i, plane_mesh, shader);
+        ant.Move(glm::fvec3(dis(e), dis(e), 0.0f));
+        ants.push_back(ant);
+    }
+    
     auto running = true;
     while (!glfwWindowShouldClose(window)/*running*/) {
         glfwGetFramebufferSize(window, &width, &height);
         
         glViewport(0, 0, width, height);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         renderer.UpdatePerspective(width, height);
 
         auto scene = std::vector<RenderObject>();
-        ant.Rotate((float)glfwGetTime());
-        ant.Update();
-        scene.push_back(ant.render_obj);
-
+        for (auto &ant : ants) 
+        {
+            ant.Update();
+            scene.push_back(ant.render_obj);
+        }
         renderer.Draw(scene);
 
         glfwSwapBuffers(window);

@@ -30,4 +30,5 @@ public:
 
 private:
     glm::fvec3 wander();
+    glm::fvec3 wander_ring();
 };

@@ -72,6 +72,8 @@ int Game()
         ants.push_back(ant);
     }
     
+    float delta_time = 0.0f;
+    float last_frame = 0.0f;
     auto running = true;
     while (!glfwWindowShouldClose(window)/*running*/) {
         glfwGetFramebufferSize(window, &width, &height);

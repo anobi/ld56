@@ -10,17 +10,18 @@ glm::fvec3 Ant::wander()
     static std::default_random_engine e;
     static std::uniform_real_distribution<> dis(-1.0f, 1.0f);
     auto jitter = 1.5f;
-    auto ring_distance = 1.0f;
-    auto ring_radius = 0.2;
+    auto ring_radius = 1.2;
 
-    auto new_target = glm::fvec3(dis(e) * jitter, dis(e) * jitter, 0.0f);
-    new_target = glm::normalize(new_target);
+    auto new_target = glm::normalize(glm::fvec3(dis(e) * jitter, dis(e) * jitter, 0.0f));
     new_target *= ring_radius;
-    new_target -= this->position;
 
-    fmt::println("Ant {} : new target at [{}, {}]", this->ant_id, new_target.x, new_target.y);
+    // Transform the target to a poit around the current position
+    auto world_target = this->position + new_target;
+    world_target = glm::clamp(world_target, glm::fvec3(-1.0f, -1.0f, 0.0f), glm::fvec3(1.0f, 1.0f, 0.0f));
 
-    return new_target;
+    fmt::println("Ant {} [{}, {}]: new target at [{}, {}]", this->ant_id, this->position.x, this->position.y, new_target.x, new_target.y);
+
+    return world_target;
 }
 
 glm::fvec3 Ant::seek(glm::fvec3 goop)
@@ -41,11 +42,10 @@ Ant::Ant(unsigned int ant_id, MeshID mesh_id, ShaderID shader_id)
 {
     this->ant_id = ant_id;
     this->tick = 0;
-    this->position = glm::fvec3(0.0f, 0.0f, 1.0f);
+    this->position = glm::fvec3(0.0f, 0.0f, 0.0f);
+    this->velocity = glm::fvec3(0.0f, 0.0f, 0.0f);
     this->scale = glm::fvec3(0.02f);
 
-    this->velocity = glm::fvec3(0.0f, 0.0f, 0.0f);
-    this->target = wander();
     this->speed = 0.001f;
 
     this->render_obj.mesh = mesh_id;
@@ -53,27 +53,39 @@ Ant::Ant(unsigned int ant_id, MeshID mesh_id, ShaderID shader_id)
     this->render_obj.is_dirty = true;
 }
 
-void Ant::Update(std::vector<Goober> goops)
+void Ant::Update(std::vector<Goop*> goops)
 {
     this->tick++;
 
     if (current_goal == WANDER)
     {
-        auto most_important_goop_position = glm::fvec3(0.0f);
+        if (this->target == glm::zero<glm::fvec3>()) {
+            this->target = wander();
+        }
+
+        Goop* most_important_goop = nullptr;
         auto most_important_goop_score = 0.0f;
         for (auto goop : goops)
         {
-            auto distance = glm::length(goop.position - this->position);
-            auto score = goop.strength * distance;
+            auto distance = glm::length(goop->position - this->position);
+
+            // Don't react if we're too close
+            if (distance < this->scoop_min_distance) 
+            {
+                continue;
+            }
+
+            auto score = goop->strength * distance;
             if ( score > most_important_goop_score )
             {
                 most_important_goop_score = score;
-                most_important_goop_position = goop.position;
+                most_important_goop = goop;
             }
         }
         if (most_important_goop_score) {
             this->current_goal = GOOPING;
-            this->target = most_important_goop_position;
+            this->target_goop = most_important_goop;
+            this->target = most_important_goop->position;
             fmt::println("Ant {} : chasing goober at [{}, {}]", this->ant_id, this->target.x, this->target.y);
         }
         else {
@@ -83,6 +95,7 @@ void Ant::Update(std::vector<Goober> goops)
                 this->target = wander();
             }
 
+            // Calculate velocity towards the wander
             auto target_dir = (this->target - this->position) * this->speed;
             auto steering_vector = target_dir - this->velocity;
             if(glm::length(steering_vector) > 1.0f) {
@@ -92,12 +105,17 @@ void Ant::Update(std::vector<Goober> goops)
             this->velocity += steering_vector;
         }
     }
-    else if (current_goal == GOOPING) {
-        this->velocity = seek(this->target);
-        if (glm::length(this->target - this->position) < 0.05f)
+    else if (current_goal == GOOPING) 
+    {
+        if (glm::length(this->target - this->position) < 0.05f || this->target_goop->dead)
         {
             this->current_goal = WANDER;
+            this->target = wander();
             fmt::println("Ant {} wandering", this->ant_id);
+        }
+        else
+        {
+            this->velocity = seek(this->target);
         }
     }
 

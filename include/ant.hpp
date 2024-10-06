@@ -4,15 +4,9 @@
 
 #include "renderable.hpp"
 #include "shader.hpp"
+#include "agent.hpp"
 #include "goop.hpp"
 
-
-enum Behavior
-{
-    WANDER,
-    GOOPING,
-    FLEEING
-};
 
 class Ant 
 {
@@ -38,9 +32,11 @@ public:
     unsigned int tick;
 
 private:
+    Agent _agent;
+
     float scoop_interest_threshold = 0.5;
     float scoop_min_distance = 0.05;
-    Behavior current_goal = WANDER;
+    
     Goop* target_goop = nullptr;
 
     glm::fvec3 wander();

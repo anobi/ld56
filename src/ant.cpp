@@ -5,39 +5,6 @@
 #include "ant.hpp"
 
 
-glm::fvec3 Ant::wander()
-{
-    static std::default_random_engine e;
-    static std::uniform_real_distribution<> dis(-1.0f, 1.0f);
-    auto jitter = 1.5f;
-    auto ring_radius = 1.2;
-
-    auto new_target = glm::normalize(glm::fvec3(dis(e) * jitter, dis(e) * jitter, 0.0f));
-    new_target *= ring_radius;
-
-    // Transform the target to a poit around the current position
-    auto world_target = this->position + new_target;
-    world_target = glm::clamp(world_target, glm::fvec3(-1.0f, -1.0f, 0.0f), glm::fvec3(1.0f, 1.0f, 0.0f));
-
-    fmt::println("Ant {} [{}, {}]: new target at [{}, {}]", this->ant_id, this->position.x, this->position.y, new_target.x, new_target.y);
-
-    return world_target;
-}
-
-glm::fvec3 Ant::seek(glm::fvec3 goop)
-{
-    auto new_velocity = glm::normalize(goop - this->position) * this->speed;
-    return new_velocity - this->velocity;
-}
-
-glm::fvec3 Ant::flee(glm::fvec3 scary)
-{
-    
-}
-
-
-
-
 Ant::Ant(unsigned int ant_id, MeshID mesh_id, ShaderID shader_id)
 {
     this->ant_id = ant_id;
@@ -70,7 +37,7 @@ void Ant::Update(std::vector<Goop*> goops)
             auto distance = glm::length(goop->position - this->position);
 
             // Don't react if we're too close
-            if (distance < this->scoop_min_distance) 
+            if (distance < this->scoop_min_distance)
             {
                 continue;
             }

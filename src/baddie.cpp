@@ -2,12 +2,15 @@
 #include <iostream>
 #include <fmt/core.h>
 
-#include "ant.hpp"
+#include "baddie.hpp"
 
-constexpr float BE_EATEN_DISTANCE = 0.05f;
+constexpr int AGGRESSION_COOLDOWN = 300;
+constexpr float MIN_DISTANCE = 0.01f;
+constexpr float CHASE_SPEED = 0.005f;
+constexpr float WANDER_SPEED = 0.001f;
 
 
-glm::fvec3 Ant::wander()
+glm::fvec3 Baddie::wander()
 {
     static std::default_random_engine e;
     static std::uniform_real_distribution<> dis(-1.0f, 1.0f);
@@ -21,83 +24,64 @@ glm::fvec3 Ant::wander()
     auto world_target = this->position + new_target;
     world_target = glm::clamp(world_target, glm::fvec3(-1.0f, -1.0f, 0.0f), glm::fvec3(1.0f, 1.0f, 0.0f));
 
-    fmt::println("Goober {} [{}, {}]: wandering to [{}, {}]", this->ID, this->position.x, this->position.y, new_target.x, new_target.y);
-
     return world_target;
 }
 
-glm::fvec3 Ant::seek(glm::fvec3 goop)
+glm::fvec3 Baddie::chase(glm::fvec3 goober)
 {
-    auto new_velocity = glm::normalize(goop - this->position) * this->speed;
+    auto new_velocity = glm::normalize(goober - this->position) * CHASE_SPEED;
+
+    
     return new_velocity - this->velocity;
 }
 
-glm::fvec3 Ant::flee(glm::fvec3 scary)
+Baddie::Baddie(MeshID mesh_id, ShaderID shader_id)
 {
-    return glm::fvec3();
-}
-
-Ant::Ant(unsigned int ID, MeshID mesh_id, ShaderID shader_id)
-{
-    this->ID = ID;
-    this->tick = 0;
     this->position = glm::fvec3(0.0f, 0.0f, 0.0f);
     this->velocity = glm::fvec3(0.0f, 0.0f, 0.0f);
-    this->scale = glm::fvec3(0.02f);
+    this->scale = glm::fvec3(0.06f);
 
     this->speed = 0.001f;
 
     this->render_obj.mesh = mesh_id;
     this->render_obj.shader = shader_id;
     this->render_obj.is_dirty = true;
+
+    fmt::println("Baddie spawned");
 }
 
-void Ant::Update(std::vector<Goop*> goops, glm::fvec3 baddie)
+void Baddie::Update(std::vector<glm::fvec3> goobers)
 {
-    this->tick++;
+    this->tick += 1;
 
-    auto distance_to_baddie = glm::length(baddie - this->position);
-    if (distance_to_baddie < BE_EATEN_DISTANCE)
+    if (current_behavior == PROWL)
     {
-        this->dead = true;
-        fmt::println("Goober {} was eaten!", this->ID);
-    }
-
-    if (current_goal == WANDER)
-    {
-        if (this->target == glm::zero<glm::fvec3>()) {
-            this->target = wander();
+        if (this->aggression_cooldown > 0) {
+            this->aggression_cooldown -= 1;
         }
 
-        Goop* most_important_goop = nullptr;
-        auto most_important_goop_score = 0.0f;
-        for (auto goop : goops)
+        glm::fvec3 closest_goober;
+        float closest_goober_distance = 999.0f;
+        for (auto g : goobers)
         {
-            auto distance = glm::length(goop->position - this->position);
+            auto distance = glm::length(g - this->position);
 
             // Don't react if we're too close
-            if (distance < this->scoop_min_distance) 
+            if (distance < closest_goober_distance) 
             {
-                continue;
-            }
-
-            auto score = goop->strength * distance;
-            if ( score > most_important_goop_score )
-            {
-                most_important_goop_score = score;
-                most_important_goop = goop;
+                closest_goober = g;
             }
         }
-        if (most_important_goop_score) {
-            this->current_goal = GOOPING;
-            this->target_goop = most_important_goop;
-            this->target = most_important_goop->position;
-            fmt::println("Goober {} : chasing goop at [{}, {}]", this->ID, this->target.x, this->target.y);
+        if (this->aggression_cooldown == 0) {
+            this->current_behavior = HUNT;
+            this->target = closest_goober;
+            this->aggression_cooldown = AGGRESSION_COOLDOWN;
+            fmt::println("Baddie [{}, {}]: found a new prey [{}, {}]", this->position.x, this->position.y, closest_goober.x, closest_goober.y);
         }
         else {
-            // Wander to a new target if at destination
-            if (glm::length(this->target - this->position) < 0.05f)
-            {
+            // Reached current wander target, find a new spot to wander to
+            auto distance_to_target = glm::length(this->target - this->position);
+            if (distance_to_target < MIN_DISTANCE) {
                 this->target = wander();
             }
 
@@ -111,17 +95,17 @@ void Ant::Update(std::vector<Goop*> goops, glm::fvec3 baddie)
             this->velocity += steering_vector;
         }
     }
-    else if (current_goal == GOOPING) 
+    else if (current_behavior == HUNT)
     {
-        if (glm::length(this->target - this->position) < 0.05f || this->target_goop->dead)
+        if (glm::length(this->target - this->position) < MIN_DISTANCE)
         {
-            this->current_goal = WANDER;
+            this->current_behavior = PROWL;
             this->target = wander();
-            fmt::println("Goober {} wandering", this->ID);
+            fmt::println("Baddie is on the hunt");
         }
         else
         {
-            this->velocity = seek(this->target);
+            this->velocity = chase(this->target);
         }
     }
 
@@ -142,7 +126,7 @@ void Ant::Update(std::vector<Goop*> goops, glm::fvec3 baddie)
     }
 }
 
-void Ant::Move(glm::fvec3 new_position)
+void Baddie::Move(glm::fvec3 new_position)
 {
     if(new_position.x > 1.0f) {
         new_position.x = -1.0f;
@@ -161,13 +145,13 @@ void Ant::Move(glm::fvec3 new_position)
     this->render_obj.is_dirty = true;
 }
 
-void Ant::Rotate(float angle)
+void Baddie::Rotate(float angle)
 {
     this->rotation_angle = angle;
     this->render_obj.is_dirty = true;
 }
 
-void Ant::Scale(glm::fvec3 new_scale)
+void Baddie::Scale(glm::fvec3 new_scale)
 {
     this->scale = new_scale;
     this->render_obj.is_dirty = true;

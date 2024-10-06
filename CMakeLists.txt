@@ -45,6 +45,7 @@ target_sources(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ant.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/goop.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/baddie.cpp
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC

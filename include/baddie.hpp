@@ -4,22 +4,18 @@
 
 #include "renderable.hpp"
 #include "shader.hpp"
-#include "goop.hpp"
 
-
-enum AntBehavior
+enum BaddieBehavior
 {
-    WANDER,
-    GOOPING,
-    FLEEING
+    PROWL,
+    HUNT
 };
 
-class Ant 
+class Baddie 
 {
 public:
-    Ant(unsigned int ID, MeshID mesh_id, ShaderID shader_id);
-    void Update(std::vector<Goop*> goops, glm::fvec3 baddie);
-
+    Baddie(MeshID mesh_id, ShaderID shader_id);
+    void Update(std::vector<glm::fvec3> goobers);
     void Move(glm::fvec3 new_position);
     void Rotate(float angle);
     void Scale(glm::fvec3 new_scale);
@@ -34,17 +30,13 @@ public:
 
     RenderObject render_obj;
 
-    unsigned int ID;
-    unsigned int tick;
-    bool dead = false;
-
 private:
+    int tick;
+    int aggression_cooldown;
     float scoop_interest_threshold = 0.5;
     float scoop_min_distance = 0.05;
-    AntBehavior current_goal = WANDER;
-    Goop* target_goop = nullptr;
-    
+    BaddieBehavior current_behavior = PROWL;
+
     glm::fvec3 wander();
-    glm::fvec3 seek(glm::fvec3 location);
-    glm::fvec3 flee(glm::fvec3 scary);
+    glm::fvec3 chase(glm::fvec3 goober);
 };

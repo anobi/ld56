@@ -121,15 +121,20 @@ int Game()
         renderer.UpdatePerspective(width, height);
 
         auto scene = std::vector<RenderObject>();
-        for (auto &ant : ants) 
-        {
-            ant.Update();
-            scene.push_back(ant.render_obj);
-        }
+        auto goobers = std::vector<Goober>();
         for (auto &goop : goops) 
         {
             goop.Update(delta_time);
             scene.push_back(goop.render_obj);
+            goobers.push_back(Goober { 
+                .strength = goop.strength,
+                .position = goop.position
+            });
+        }
+        for (auto &ant : ants) 
+        {
+            ant.Update(goobers);
+            scene.push_back(ant.render_obj);
         }
 
         renderer.Draw(scene);

@@ -39,5 +39,6 @@ void Renderer::UpdatePerspective(float width, float height)
 {
     float ratio = width / height;
     auto p = glm::ortho(ratio, -ratio, -1.0f, 1.0f, 1.0f, -1.0f);
+    // auto p = glm::ortho(0.0f, width * ratio, 0.0f, height, 0.0f, 100.0f);
     this->projection_matrix = p;
 }

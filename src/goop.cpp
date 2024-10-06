@@ -6,7 +6,7 @@
 Goop::Goop(MeshID mesh_id, ShaderID shader_id, glm::fvec3 pos)
 {
     this->position = pos;
-    this->scale = glm::fvec3(this->radius * this->strength);
+    this->scale = glm::fvec3(this->radius);
 
     static std::default_random_engine e;
     static std::uniform_int_distribution<> dis(0, 359);
@@ -18,7 +18,7 @@ Goop::Goop(MeshID mesh_id, ShaderID shader_id, glm::fvec3 pos)
     this->render_obj.mesh = mesh_id;
     this->render_obj.shader = shader_id;
     this->render_obj.is_dirty = true;
-    fmt::println("Goop spawned");
+    fmt::println("Goop spawned at [{}, {}]", pos.x, pos.y);
 }
 
 void Goop::Update(float dt)

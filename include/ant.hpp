@@ -5,11 +5,25 @@
 #include "renderable.hpp"
 #include "shader.hpp"
 
+
+struct Goober
+{
+    float strength;
+    glm::fvec3 position;
+};
+
+enum Behavior
+{
+    WANDER,
+    GOOPING,
+    FLEEING
+};
+
 class Ant 
 {
 public:
     Ant(unsigned int ant_id, MeshID mesh_id, ShaderID shader_id);
-    void Update();
+    void Update(std::vector<Goober> goops);
 
     void Move(glm::fvec3 new_position);
     void Rotate(float angle);
@@ -29,6 +43,9 @@ public:
     unsigned int tick;
 
 private:
+    float scoop_interest_threshold = 0.5;
+    Behavior current_goal = WANDER;
     glm::fvec3 wander();
-    glm::fvec3 wander_ring();
+    glm::fvec3 seek(glm::fvec3 goop);
+    glm::fvec3 flee(glm::fvec3 scary);
 };

@@ -11,6 +11,7 @@
 #include <fmt/core.h>
 
 #include "renderer.hpp"
+#include "text_rendering.hpp"
 #include "primitives.hpp"
 #include "shader.hpp"
 #include "ant.hpp"
@@ -89,6 +90,11 @@ int Game()
 
     srand (static_cast <unsigned> (time(0)));
 
+
+    auto text_shader = renderer.AddShader("shaders/text.vert", "shaders/text.frag");
+    auto text_renderer = TextRenderer(width, height, renderer.GetShaderRef(text_shader));
+    text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 60);
+
     // Load "content"
     shader = renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
 
@@ -164,13 +170,18 @@ int Game()
                     goobers.erase(goobers.begin() + i);
                 }
             }
+            goober_count = goobers.size();
         }
         else // Game over
         {
-            
+            //text_renderer.Draw("Game Over!", glm::fvec2(0.0f, 0.0f), 1.0f, glm::fvec3(0.2f));
+            fmt::println("All goobers eaten! Game Over!");
         }
 
         renderer.Draw(scene);
+
+        auto l_score = fmt::format("Goobers alive: {}", goober_count);
+        text_renderer.Draw("Goobers alive", glm::fvec2(1.0f, 1.0f), 1.0f, glm::fvec3(0.2f));
 
         glfwSwapBuffers(window);
         glfwPollEvents();

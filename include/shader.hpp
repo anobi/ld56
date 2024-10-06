@@ -68,8 +68,12 @@ public:
     void use() const { glUseProgram(this->ID); }
     GLuint getUniformLocation(const char* name) const { return glGetUniformLocation(this->ID, name); }
 
-private:
+    void SetVec3f(const std::string name, glm::fvec3 value)
+    {
+        glUniform3fv(glGetUniformLocation(this->ID, name.c_str()), 1, &value[0]);
+    }
 
+private:
     void checkCompileErrors(GLuint shader, std::string type) {
         GLint success;
         GLchar infoLog[1024];

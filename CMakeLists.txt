@@ -35,6 +35,8 @@ target_link_libraries(${PROJECT_NAME}
   fmt
 )
 
+find_package(Freetype REQUIRED)
+
 ##################
 # Internal stuff #
 ##################
@@ -43,13 +45,19 @@ target_sources(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderable.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/text_rendering.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ant.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/goop.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/baddie.cpp
 )
+target_link_libraries(${PROJECT_NAME}
+  ${FREETYPE_LIBRARIES}
+)
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+  PRIVATE
+  ${FREETYPE_INCLUDE_DIRS}
 )
 
 
@@ -63,4 +71,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_BINARY_DIR}/shaders/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/
+)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_BINARY_DIR}/assets/ $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets/
 )

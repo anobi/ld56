@@ -84,6 +84,9 @@ int Game()
     gladLoadGL(glfwGetProcAddress);
     glfwSwapInterval(1);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+
     // Input setup
     glfwSetKeyCallback(window, input_key_callback);
     glfwSetMouseButtonCallback(window, input_mouse_button_callback);
@@ -93,7 +96,7 @@ int Game()
 
     auto text_shader = renderer.AddShader("shaders/text.vert", "shaders/text.frag");
     auto text_renderer = TextRenderer(width, height, renderer.GetShaderRef(text_shader));
-    text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 15);
+    text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 120);
 
     // Load "content"
     shader = renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
@@ -106,8 +109,8 @@ int Game()
 
     static std::default_random_engine e;
     static std::uniform_real_distribution<> dis(-1.0f, 1.0f);
-    for (int i = 1; i < 10; i++) {
-        auto goober = Ant(i, plane_mesh, shader);
+    for (int i = 0; i < 10; i++) {
+        auto goober = Ant(i+1, plane_mesh, shader);
         goober.Move(glm::fvec3(dis(e), dis(e), 0.0f));
         goobers.push_back(goober);
     }
@@ -123,18 +126,22 @@ int Game()
     float last_frame = 0.0f;
     auto running = true;
     auto goober_count = goobers.size();
+    auto game_over = false;
     while (!glfwWindowShouldClose(window)/*running*/) {
         glfwGetFramebufferSize(window, &width, &height);
         
         glViewport(0, 0, width, height);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+
+        if (!game_over) {
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
 
         renderer.UpdatePerspective(width, height);
 
         auto scene = std::vector<RenderObject>();
 
-        if (goober_count > 0)
+        if (!game_over)
         {
             auto goopies = std::vector<Goop*>();
             for (auto &goop : goops) 
@@ -171,17 +178,23 @@ int Game()
                 }
             }
             goober_count = goobers.size();
+            if (goober_count <= 0) 
+            {
+                game_over = true;
+            }
         }
-        else // Game over
-        {
-            //text_renderer.Draw("Game Over!", glm::fvec2(0.0f, 0.0f), 1.0f, glm::fvec3(0.2f));
-            fmt::println("All goobers eaten! Game Over!");
-        }
+
 
         renderer.Draw(scene);
 
         auto l_score = fmt::format("Goobers alive: {}", goober_count);
-        text_renderer.Draw("Goobers alive", glm::fvec2(0.0f, 0.0f), 0.1f, glm::fvec3(0.2f));
+        text_renderer.Draw(l_score, glm::fvec2(10.0f, 10.0f), 0.25f, glm::fvec3(0.1f));
+
+        if (game_over) // Game over
+        {
+            text_renderer.Draw("Game Over!", glm::fvec2(120.0f, 250.0f), 1.0f, glm::fvec3(0.1f));
+            fmt::println("All goobers eaten! Game Over!");
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();

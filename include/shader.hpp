@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/gl.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <string>
 #include <fstream>
@@ -68,9 +69,28 @@ public:
     void use() const { glUseProgram(this->ID); }
     GLuint getUniformLocation(const char* name) const { return glGetUniformLocation(this->ID, name); }
 
-    void SetVec3f(const std::string name, glm::fvec3 value)
+    void SetInt(const std::string name, int value, bool useShader)
     {
+        if (useShader) {
+            this->use();
+        }
+        glUniform1i(glGetUniformLocation(this->ID, name.c_str()), value);
+    }
+
+    void SetVec3f(const std::string name, glm::fvec3 value, bool useShader)
+    {
+        if (useShader) {
+            this->use();
+        }
         glUniform3fv(glGetUniformLocation(this->ID, name.c_str()), 1, &value[0]);
+    }
+
+    void SetMat4(const char* name, glm::mat4 value, bool useShader)
+    {
+        if (useShader) {
+            this->use();
+        }
+        glUniformMatrix4fv(glGetUniformLocation(this->ID, name), 1, false, glm::value_ptr(value));
     }
 
 private:

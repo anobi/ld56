@@ -1,7 +1,9 @@
 #include <glad/gl.h>
 #include <fmt/core.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
 
 #include "text_rendering.hpp"
 
@@ -11,6 +13,13 @@ TextRenderer::TextRenderer(unsigned int width, unsigned int height, Shader* shad
 {
     // Generate
     this->shader = shader;
+
+    float ratio = width / height;
+    auto p = glm::ortho(ratio, -ratio, -1.0f, 1.0f, 1.0f, -1.0f);
+    
+    this->shader->SetMat4("transform", glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f), true);
+    this->shader->SetInt("text", 0, true);
+
     glGenVertexArrays(1, &this->gpuMesh.VAO);
     glGenBuffers(1, &this->gpuMesh.VBO);
 
@@ -96,8 +105,8 @@ void TextRenderer::LoadFont(const char *font, unsigned int fontSize)
 void TextRenderer::Draw(std::string text, glm::fvec2 pos, float scale, glm::fvec3 color)
 {
     // TODO: Activate shader and set color attribute
-    this->shader->use();
-    this->shader->SetVec3f("textColor", color);
+    this->shader->SetMat4("transform", glm::ortho(0.0f, 800.0f, 600.0f, 0.0f), true);
+    this->shader->SetVec3f("textColor", color, true);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(this->gpuMesh.VAO);
 
@@ -123,7 +132,9 @@ void TextRenderer::Draw(std::string text, glm::fvec2 pos, float scale, glm::fvec
 
         glBindTexture(GL_TEXTURE_2D, ch.textureId);
         glBindBuffer(GL_ARRAY_BUFFER, this->gpuMesh.VBO);
+
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 

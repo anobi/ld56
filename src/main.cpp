@@ -50,7 +50,7 @@ void input_mouse_button_callback(GLFWwindow* window, int button, int action, int
     {
         double mouse_x, mouse_y;
         glfwGetCursorPos(window, &mouse_x, &mouse_y);
-        fmt::println("Mouse 1 clicked at [{}, {}]", mouse_x, mouse_y);
+        //fmt::println("Mouse 1 clicked at [{}, {}]", mouse_x, mouse_y);
 
         // Translate coordinates
         mouse_x = 1 - (mouse_x / width) * 2.0f;
@@ -132,10 +132,7 @@ int Game()
         
         glViewport(0, 0, width, height);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-        if (!game_over) {
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
+        glClear(GL_COLOR_BUFFER_BIT);
 
         renderer.UpdatePerspective((float)width, (float)height);
 
@@ -193,7 +190,7 @@ int Game()
         if (game_over) // Game over
         {
             text_renderer.Draw("Game Over!", glm::fvec2(120.0f, 250.0f), 1.0f, glm::fvec3(0.1f));
-            fmt::println("All goobers eaten! Game Over!");
+            //fmt::println("All goobers eaten! Game Over!");
         }
 
         glfwSwapBuffers(window);

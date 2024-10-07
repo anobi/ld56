@@ -18,20 +18,20 @@ Goop::Goop(MeshID mesh_id, ShaderID shader_id, glm::fvec3 pos)
     this->render_obj.mesh = mesh_id;
     this->render_obj.shader = shader_id;
     this->render_obj.is_dirty = true;
-    fmt::println("Goop spawned at [{}, {}]", pos.x, pos.y);
+    //fmt::println("Goop spawned at [{}, {}]", pos.x, pos.y);
 }
 
 void Goop::Update(float dt)
 {
     if (this->dead) {
-        fmt::println("Goop is dead");
+        //fmt::println("Goop is dead");
         return;
     }
 
     this->strength -= this->decay;
     if (this->strength < 0.0f) {
         this->dead = true;
-        fmt::println("Goop died");
+        //fmt::println("Goop died");
     }
 
     this->scale = glm::fvec3(this->radius * this->strength);

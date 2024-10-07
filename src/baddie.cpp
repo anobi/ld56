@@ -45,7 +45,7 @@ Baddie::Baddie(MeshID mesh_id, ShaderID shader_id)
     this->render_obj.shader = shader_id;
     this->render_obj.is_dirty = true;
 
-    fmt::println("Baddie spawned");
+    //fmt::println("Baddie spawned");
 }
 
 void Baddie::Update(std::vector<glm::fvec3> goobers)
@@ -74,7 +74,7 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
             this->current_behavior = HUNT;
             this->target = closest_goober;
             this->aggression_cooldown = AGGRESSION_COOLDOWN;
-            fmt::println("Baddie [{}, {}]: found a new prey [{}, {}]", this->position.x, this->position.y, closest_goober.x, closest_goober.y);
+            //fmt::println("Baddie [{}, {}]: found a new prey [{}, {}]", this->position.x, this->position.y, closest_goober.x, closest_goober.y);
         }
         else {
             // Reached current wander target, find a new spot to wander to
@@ -90,7 +90,7 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
         {
             this->current_behavior = PROWL;
             this->target = wander();
-            fmt::println("Baddie is on the hunt");
+            //fmt::println("Baddie is on the hunt");
         }
         // else
         // {

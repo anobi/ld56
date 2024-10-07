@@ -48,13 +48,13 @@ void TextRenderer::LoadFont(const char *font, unsigned int fontSize)
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) 
     {
-        fmt::println("ERROR TextRenderer: Could not init FreeType");
+        //fmt::println("ERROR TextRenderer: Could not init FreeType");
     }
 
     FT_Face face;
     if (FT_New_Face(ft, font, 0, &face))
     {
-        fmt::println("ERROR TextRenderer: Could not load font {}", font);
+        //fmt::println("ERROR TextRenderer: Could not load font {}", font);
     }
 
     FT_Set_Pixel_Sizes(face, 0, fontSize);
@@ -67,7 +67,7 @@ void TextRenderer::LoadFont(const char *font, unsigned int fontSize)
     {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
         {
-            fmt::println("ERROR TextRenderer: Failed to load glyph {}", c);
+            //fmt::println("ERROR TextRenderer: Failed to load glyph {}", c);
             continue;
         }
 

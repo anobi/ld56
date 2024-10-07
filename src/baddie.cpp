@@ -6,8 +6,8 @@
 
 constexpr int AGGRESSION_COOLDOWN = 300;
 constexpr float MIN_DISTANCE = 0.01f;
-constexpr float CHASE_SPEED = 0.007f;
-constexpr float WANDER_SPEED = 0.001f;
+constexpr float BADDIE_CHASE_SPEED = 0.007f;
+constexpr float BADDIE_WANDER_SPEED = 0.001f;
 
 
 glm::fvec3 Baddie::wander()
@@ -29,7 +29,7 @@ glm::fvec3 Baddie::wander()
 
 glm::fvec3 Baddie::chase(glm::fvec3 goober)
 {
-    auto new_velocity = glm::normalize(goober - this->position) * CHASE_SPEED;
+    auto new_velocity = glm::normalize(goober - this->position) * BADDIE_CHASE_SPEED;
     return new_velocity - this->velocity;
 }
 
@@ -39,7 +39,7 @@ Baddie::Baddie(MeshID mesh_id, ShaderID shader_id)
     this->velocity = glm::fvec3(0.0f, 0.0f, 0.0f);
     this->scale = glm::fvec3(0.06f);
 
-    this->speed = 0.001f;
+    // this->speed = 0.001f;
 
     this->render_obj.mesh = mesh_id;
     this->render_obj.shader = shader_id;
@@ -99,9 +99,9 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
     }
 
     // Calculate velocity towards the target
-    auto move_speed = WANDER_SPEED;
+    auto move_speed = BADDIE_WANDER_SPEED;
     if (current_behavior == HUNT) {
-        move_speed = CHASE_SPEED;
+        move_speed = BADDIE_CHASE_SPEED;
     }
 
     auto target_dir = (this->target - this->position) * move_speed;

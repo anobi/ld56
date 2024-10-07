@@ -22,7 +22,7 @@ public:
 
     glm::fvec3 target;
     glm::fvec3 velocity;
-    float speed;
+    // float speed;
 
     glm::fvec3 position;
     glm::fvec3 scale;

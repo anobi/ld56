@@ -14,6 +14,8 @@ enum AntBehavior
     FLEEING
 };
 
+
+// This was supposed to be an ant game
 class Ant 
 {
 public:
@@ -39,10 +41,10 @@ public:
     bool dead = false;
 
 private:
-    float scoop_interest_threshold = 0.5;
-    float scoop_min_distance = 0.05;
+    float goop_interest_threshold = 0.5;
+    float goop_min_distance = 0.05;
+    float current_goop_score = 0.0f;
     AntBehavior current_goal = WANDER;
-    Goop* target_goop = nullptr;
     
     glm::fvec3 wander();
     glm::fvec3 seek(glm::fvec3 location);

@@ -75,7 +75,7 @@ int Game()
 
     glfwSetErrorCallback(error_callback);
 
-    window = glfwCreateWindow(width, height, "LD56 - Goops and Goobers", NULL, NULL);
+    window = glfwCreateWindow(width, height, "LD56 - Goop and Goobers", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;

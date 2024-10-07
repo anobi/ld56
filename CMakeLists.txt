@@ -1,9 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 set(CMAKE_CXX_STANDARD 23)
-project(Game)
+project(Goobers)
 include(FetchContent)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+if(WIN32)
+    add_executable(${PROJECT_NAME} WIN32 src/main.cpp)
+else()
+    add_executable(${PROJECT_NAME} src/main.cpp)
+endif()
+
 
 ##################
 # External deps  #

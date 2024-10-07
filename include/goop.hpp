@@ -1,6 +1,7 @@
 #pragma once
 
-#include <glm/gtc/quaternion.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "renderable.hpp"
 #include "shader.hpp"
@@ -13,13 +14,13 @@ public:
 
     glm::fvec3 position;
     glm::fvec3 scale;
-    float rotation_angle;
-    float rotation_dir;
+    float rotation_angle = 0.0f;
+    float rotation_dir = 0.0f;
 
     float lifetime = 100.0f;
     float radius = 0.10f;
     float strength = 1.0f;
-    float decay = 0.001;
+    float decay = 0.001f;
     bool dead = false;
 
     RenderObject render_obj;

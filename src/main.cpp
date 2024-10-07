@@ -137,7 +137,7 @@ int Game()
             glClear(GL_COLOR_BUFFER_BIT);
         }
 
-        renderer.UpdatePerspective(width, height);
+        renderer.UpdatePerspective((float)width, (float)height);
 
         auto scene = std::vector<RenderObject>();
 

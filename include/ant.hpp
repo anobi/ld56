@@ -1,6 +1,7 @@
 #pragma once
 
-#include <glm/gtc/quaternion.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "renderable.hpp"
 #include "shader.hpp"
@@ -32,17 +33,17 @@ public:
 
     glm::fvec3 position;
     glm::fvec3 scale;
-    float rotation_angle;
+    float rotation_angle = 0.0f;
 
     RenderObject render_obj;
 
-    unsigned int ID;
-    unsigned int tick;
+    unsigned int ID = 0;
+    unsigned int tick = 0;
     bool dead = false;
 
 private:
-    float goop_interest_threshold = 0.5;
-    float goop_min_distance = 0.05;
+    float goop_interest_threshold = 0.5f;
+    float goop_min_distance = 0.05f;
     float current_goop_score = 0.0f;
     AntBehavior current_goal = WANDER;
     

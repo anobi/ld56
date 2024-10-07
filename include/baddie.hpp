@@ -1,6 +1,7 @@
 #pragma once
 
-#include <glm/gtc/quaternion.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "renderable.hpp"
 #include "shader.hpp"
@@ -26,15 +27,15 @@ public:
 
     glm::fvec3 position;
     glm::fvec3 scale;
-    float rotation_angle;
+    float rotation_angle = 0.0f;
 
     RenderObject render_obj;
 
 private:
-    int tick;
-    int aggression_cooldown;
-    float scoop_interest_threshold = 0.5;
-    float scoop_min_distance = 0.05;
+    int tick = 0;
+    int aggression_cooldown = 0;
+    float scoop_interest_threshold = 0.5f;
+    float scoop_min_distance = 0.05f;
     BaddieBehavior current_behavior = PROWL;
 
     glm::fvec3 wander();

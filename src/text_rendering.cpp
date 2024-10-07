@@ -1,6 +1,10 @@
 #include <glad/gl.h>
 #include <fmt/core.h>
+
+#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -14,7 +18,7 @@ TextRenderer::TextRenderer(unsigned int width, unsigned int height, Shader* shad
     // Generate
     this->shader = shader;
 
-    float ratio = width / height;
+    float ratio = (float)width / (float)height;
     auto p = glm::ortho(ratio, -ratio, -1.0f, 1.0f, 1.0f, -1.0f);
     
     this->shader->SetMat4("transform", glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f), true);

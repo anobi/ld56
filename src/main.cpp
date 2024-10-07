@@ -93,7 +93,7 @@ int Game()
 
     auto text_shader = renderer.AddShader("shaders/text.vert", "shaders/text.frag");
     auto text_renderer = TextRenderer(width, height, renderer.GetShaderRef(text_shader));
-    text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 60);
+    text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 15);
 
     // Load "content"
     shader = renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
@@ -181,7 +181,7 @@ int Game()
         renderer.Draw(scene);
 
         auto l_score = fmt::format("Goobers alive: {}", goober_count);
-        text_renderer.Draw("Goobers alive", glm::fvec2(1.0f, 1.0f), 1.0f, glm::fvec3(0.2f));
+        text_renderer.Draw("Goobers alive", glm::fvec2(0.0f, 0.0f), 0.1f, glm::fvec3(0.2f));
 
         glfwSwapBuffers(window);
         glfwPollEvents();

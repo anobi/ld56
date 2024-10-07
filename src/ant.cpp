@@ -63,12 +63,12 @@ void Ant::Update(std::vector<Goop*> goops, glm::fvec3 baddie)
         fmt::println("Goober {} was eaten!", this->ID);
     }
 
+    if (this->target == glm::zero<glm::fvec3>()) {
+        this->target = wander();
+    }
+
     if (current_goal == WANDER)
     {
-        if (this->target == glm::zero<glm::fvec3>()) {
-            this->target = wander();
-        }
-
         Goop* most_important_goop = nullptr;
         auto most_important_goop_score = 0.0f;
         for (auto goop : goops)
@@ -88,8 +88,27 @@ void Ant::Update(std::vector<Goop*> goops, glm::fvec3 baddie)
                 most_important_goop = goop;
             }
         }
-        if (most_important_goop_score) {
-            this->current_goal = GOOPING;
+
+        // Check if current goop is alive and/or there are more interesting goops nearby
+        auto current_goop_score = 0.0f;
+        if (this->target_goop) {
+            auto target_goop_pos = target_goop->position;
+            auto current_goop_distance = glm::length(target_goop_pos - this->position);
+            if (current_goop_distance < 0.05f || this->target_goop->dead)
+            {
+                this->current_goal = WANDER;
+                this->target = wander();
+                this->target_goop = nullptr;
+                fmt::println("Goober {} wandering", this->ID);
+            }
+            else {
+                current_goop_score = this->target_goop->strength *current_goop_distance;
+            }
+        }
+        
+        // Go after more interesting goop
+        if (most_important_goop_score > current_goop_score) {
+            // this->current_goal = GOOPING;
             this->target_goop = most_important_goop;
             this->target = most_important_goop->position;
             fmt::println("Goober {} : chasing goop at [{}, {}]", this->ID, this->target.x, this->target.y);
@@ -99,35 +118,30 @@ void Ant::Update(std::vector<Goop*> goops, glm::fvec3 baddie)
             if (glm::length(this->target - this->position) < 0.05f)
             {
                 this->target = wander();
+                fmt::println("Goober {} wandering", this->ID);
             }
-
-            // Calculate velocity towards the wander
-            auto target_dir = (this->target - this->position) * this->speed;
-            auto steering_vector = target_dir - this->velocity;
-            if(glm::length(steering_vector) > 1.0f) {
-                steering_vector *= 1 - 0.001 / glm::length(steering_vector);
-            }
-
-            this->velocity += steering_vector;
         }
     }
-    else if (current_goal == GOOPING) 
-    {
-        if (glm::length(this->target - this->position) < 0.05f || this->target_goop->dead)
-        {
-            this->current_goal = WANDER;
-            this->target = wander();
-            fmt::println("Goober {} wandering", this->ID);
-        }
-        else
-        {
-            this->velocity = seek(this->target);
-        }
-    }
+    // else if (current_goal == GOOPING) 
+    // {
+    //     if (glm::length(this->target - this->position) < 0.05f || this->target_goop->dead)
+    //     {
+    //         this->current_goal = WANDER;
+    //         this->target = wander();
+    //         fmt::println("Goober {} wandering", this->ID);
+    //     }
+    // }
 
+
+    // Calculate velocity towards the target
+    auto target_dir = (this->target - this->position) * this->speed;
+    auto steering_vector = target_dir - this->velocity;
+    if(glm::length(steering_vector) > 1.0f) {
+        steering_vector *= 1 - 0.001 / glm::length(steering_vector);
+    }
+    this->velocity += steering_vector;
     this->velocity.z = 0.0f;
     auto new_position = this->position + this->velocity;
-    new_position.z = 0.0f;
     Move(new_position);
 
     // Update render matrix

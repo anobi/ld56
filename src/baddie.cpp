@@ -6,7 +6,7 @@
 
 constexpr int AGGRESSION_COOLDOWN = 300;
 constexpr float MIN_DISTANCE = 0.01f;
-constexpr float CHASE_SPEED = 0.005f;
+constexpr float CHASE_SPEED = 0.007f;
 constexpr float WANDER_SPEED = 0.001f;
 
 
@@ -30,8 +30,6 @@ glm::fvec3 Baddie::wander()
 glm::fvec3 Baddie::chase(glm::fvec3 goober)
 {
     auto new_velocity = glm::normalize(goober - this->position) * CHASE_SPEED;
-
-    
     return new_velocity - this->velocity;
 }
 
@@ -84,15 +82,6 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
             if (distance_to_target < MIN_DISTANCE) {
                 this->target = wander();
             }
-
-            // Calculate velocity towards the wander
-            auto target_dir = (this->target - this->position) * this->speed;
-            auto steering_vector = target_dir - this->velocity;
-            if(glm::length(steering_vector) > 1.0f) {
-                steering_vector *= 1 - 0.001 / glm::length(steering_vector);
-            }
-
-            this->velocity += steering_vector;
         }
     }
     else if (current_behavior == HUNT)
@@ -103,15 +92,28 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
             this->target = wander();
             fmt::println("Baddie is on the hunt");
         }
-        else
-        {
-            this->velocity = chase(this->target);
-        }
+        // else
+        // {
+        //     this->velocity = chase(this->target);
+        // }
     }
 
+    // Calculate velocity towards the target
+    auto move_speed = WANDER_SPEED;
+    if (current_behavior == HUNT) {
+        move_speed = CHASE_SPEED;
+    }
+
+    auto target_dir = (this->target - this->position) * move_speed;
+    auto steering_vector = target_dir - this->velocity;
+    if(glm::length(steering_vector) > 1.0f) {
+        steering_vector *= 1 - 0.001 / glm::length(steering_vector);
+    }
+
+    this->velocity += steering_vector;
     this->velocity.z = 0.0f;
+
     auto new_position = this->position + this->velocity;
-    new_position.z = 0.0f;
     Move(new_position);
 
     // Update render matrix

@@ -3,7 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-enum Behavior
+enum AgentBehavior
 {
     IDLE,
     WANDER,
@@ -24,14 +24,14 @@ public:
     glm::fvec3 GetDesiredVelocity();
 
 private:
-    Behavior evaluate_situation();
+    AgentBehavior evaluate_situation();
     void wander();
     void seek();
     void evade();
 
     glm::fvec3 position;
     glm::fvec3 desired_velocity;
-    Behavior current_behavior = IDLE;
+    AgentBehavior current_behavior = IDLE;
 
     std::vector<Interest> interests;
     Interest* current_interest = nullptr;

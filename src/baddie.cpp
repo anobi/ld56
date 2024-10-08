@@ -52,7 +52,7 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
 {
     this->tick += 1;
 
-    if (current_behavior == PROWL)
+    if (current_behavior == WANDER)
     {
         if (this->aggression_cooldown > 0) {
             this->aggression_cooldown -= 1;
@@ -71,7 +71,7 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
             }
         }
         if (this->aggression_cooldown == 0) {
-            this->current_behavior = HUNT;
+            this->current_behavior = SEEK;
             this->target = closest_goober;
             this->aggression_cooldown = AGGRESSION_COOLDOWN;
             //fmt::println("Baddie [{}, {}]: found a new prey [{}, {}]", this->position.x, this->position.y, closest_goober.x, closest_goober.y);
@@ -84,11 +84,11 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
             }
         }
     }
-    else if (current_behavior == HUNT)
+    else if (current_behavior == SEEK)
     {
         if (glm::length(this->target - this->position) < MIN_DISTANCE)
         {
-            this->current_behavior = PROWL;
+            this->current_behavior = WANDER;
             this->target = wander();
             //fmt::println("Baddie is on the hunt");
         }
@@ -100,7 +100,7 @@ void Baddie::Update(std::vector<glm::fvec3> goobers)
 
     // Calculate velocity towards the target
     auto move_speed = BADDIE_WANDER_SPEED;
-    if (current_behavior == HUNT) {
+    if (current_behavior == SEEK) {
         move_speed = BADDIE_CHASE_SPEED;
     }
 

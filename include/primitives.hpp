@@ -23,11 +23,11 @@ Primitive plane {
 Primitive plane_col(glm::fvec3 color) {
     return {
             std::vector<Vertex> {
-            Vertex { glm::fvec3( 0.5f,  0.5f,  0.0f), color },
-            Vertex { glm::fvec3( 0.5f, -0.5f,  0.0f), color },
-            Vertex { glm::fvec3(-0.5f, -0.5f,  0.0f), color },
-            Vertex { glm::fvec3(-0.5f,  0.5f,  0.0f), color }
-        },
+                Vertex { glm::fvec3( 0.5f,  0.5f,  0.0f), color },
+                Vertex { glm::fvec3( 0.5f, -0.5f,  0.0f), color },
+                Vertex { glm::fvec3(-0.5f, -0.5f,  0.0f), color },
+                Vertex { glm::fvec3(-0.5f,  0.5f,  0.0f), color }
+            },
         std::vector<unsigned int> {
             0, 1, 3, // first triangle
             1, 2, 3  // second triangle

@@ -10,12 +10,13 @@
 
 #include <fmt/core.h>
 
-
 #include "renderer.hpp"
+#include "text_rendering.hpp"
 #include "primitives.hpp"
 #include "shader.hpp"
 #include "ant.hpp"
 #include "goop.hpp"
+#include "baddie.hpp"
 
 
 int width = 800;
@@ -24,7 +25,7 @@ GLFWwindow* window;
 
 Renderer renderer;
 
-std::vector<Ant> ants;
+std::vector<Ant> goobers;
 std::vector<Goop> goops;
 
 ShaderID shader;
@@ -49,7 +50,7 @@ void input_mouse_button_callback(GLFWwindow* window, int button, int action, int
     {
         double mouse_x, mouse_y;
         glfwGetCursorPos(window, &mouse_x, &mouse_y);
-        fmt::println("Mouse 1 clicked at [{}, {}]", mouse_x, mouse_y);
+        //fmt::println("Mouse 1 clicked at [{}, {}]", mouse_x, mouse_y);
 
         // Translate coordinates
         mouse_x = 1 - (mouse_x / width) * 2.0f;
@@ -74,7 +75,7 @@ int Game()
 
     glfwSetErrorCallback(error_callback);
 
-    window = glfwCreateWindow(width, height, "LD56", NULL, NULL);
+    window = glfwCreateWindow(width, height, "LD56 - Goop and Goobers", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -83,34 +84,49 @@ int Game()
     gladLoadGL(glfwGetProcAddress);
     glfwSwapInterval(1);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+
     // Input setup
     glfwSetKeyCallback(window, input_key_callback);
     glfwSetMouseButtonCallback(window, input_mouse_button_callback);
 
     srand (static_cast <unsigned> (time(0)));
 
-    // Tringaly stuff
-    shader = renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
 
-    auto ant_plane = plane_col(glm::fvec3(0.1f));
-    auto plane_mesh = renderer.AddMesh(ant_plane.vertices, ant_plane.indices);
+    auto text_shader = renderer.AddShader("shaders/text.vert", "shaders/text.frag");
+    auto text_renderer = TextRenderer(width, height, renderer.GetShaderRef(text_shader));
+    text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 120);
+
+    // Load "content"
+    shader = renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
 
     auto goop_plane = plane_col(glm::fvec3(0.4f, 0.7f, 0.4f));
     goop_mesh = renderer.AddMesh(goop_plane.vertices, goop_plane.indices);
     
-    
-    for (int i = 1; i < 10; i++) {
-        static std::default_random_engine e;
-        static std::uniform_real_distribution<> dis(-1.0f, 1.0f);
+    auto ant_plane = plane_col(glm::fvec3(0.1f));
+    auto plane_mesh = renderer.AddMesh(ant_plane.vertices, ant_plane.indices);
 
-        auto ant = Ant(i, plane_mesh, shader);
-        ant.Move(glm::fvec3(dis(e), dis(e), 0.0f));
-        ants.push_back(ant);
+    static std::default_random_engine e;
+    static std::uniform_real_distribution<> dis(-1.0f, 1.0f);
+    for (int i = 0; i < 10; i++) {
+        auto goober = Ant(i+1, plane_mesh, shader);
+        goober.Move(glm::fvec3(dis(e), dis(e), 0.0f));
+        goobers.push_back(goober);
     }
-    
+
+    auto baddie_plane = plane_col(glm::fvec3(0.8f, 0.2f, 0.2f));
+    auto baddie_mesh = renderer.AddMesh(baddie_plane.vertices, baddie_plane.indices);
+    auto baddie = Baddie(baddie_mesh, shader);
+
+    baddie.Move(glm::fvec3(dis(e), dis(e), 0.0f));
+
+    // Run the game
     float delta_time = 0.0f;
     float last_frame = 0.0f;
     auto running = true;
+    auto goober_count = goobers.size();
+    auto game_over = false;
     while (!glfwWindowShouldClose(window)/*running*/) {
         glfwGetFramebufferSize(window, &width, &height);
         
@@ -118,30 +134,63 @@ int Game()
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        renderer.UpdatePerspective(width, height);
+        renderer.UpdatePerspective((float)width, (float)height);
 
         auto scene = std::vector<RenderObject>();
-        auto goobers = std::vector<Goop*>();
-        for (auto &goop : goops) 
+
+        if (!game_over)
         {
-            goop.Update(delta_time);
-            scene.push_back(goop.render_obj);
-            goobers.push_back(&goop);
+            auto goopies = std::vector<Goop*>();
+            for (auto &goop : goops) 
+            {
+                goop.Update(delta_time);
+                scene.push_back(goop.render_obj);
+                goopies.push_back(&goop);
+            }
+
+            auto goober_locations = std::vector<glm::fvec3>();
+            for (auto &goobie : goobers) 
+            {
+                goobie.Update(goopies, baddie.position);
+                scene.push_back(goobie.render_obj);
+                goober_locations.push_back(goobie.position);
+            }
+
+            baddie.Update(goober_locations);
+            scene.push_back(baddie.render_obj);
+
+            // Clear dead goops
+            for (int i = 0; i < goops.size(); i++) {
+                auto goop = &goops[i];
+                if (goop->dead) {
+                    goops.erase(goops.begin() + i);
+                }
+            }
+
+            // Clear dead goobers
+            for (int i = 0; i < goobers.size(); i++) {
+                auto goober = &goobers[i];
+                if (goober->dead) {
+                    goobers.erase(goobers.begin() + i);
+                }
+            }
+            goober_count = goobers.size();
+            if (goober_count <= 0) 
+            {
+                game_over = true;
+            }
         }
-        for (auto &ant : ants) 
-        {
-            ant.Update(goobers);
-            scene.push_back(ant.render_obj);
-        }
+
 
         renderer.Draw(scene);
 
-        // Clear dead goops
-        for (int i = 0; i < goops.size(); i++) {
-            auto goop = &goops[i];
-            if (goop->dead) {
-                goops.erase(goops.begin() + i);
-            }
+        auto l_score = fmt::format("Goobers alive: {}", goober_count);
+        text_renderer.Draw(l_score, glm::fvec2(10.0f, 10.0f), 0.25f, glm::fvec3(0.1f));
+
+        if (game_over) // Game over
+        {
+            text_renderer.Draw("Game Over!", glm::fvec2(120.0f, 250.0f), 1.0f, glm::fvec3(0.1f));
+            //fmt::println("All goobers eaten! Game Over!");
         }
 
         glfwSwapBuffers(window);

@@ -1,4 +1,6 @@
+#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "renderer.hpp"
 
@@ -41,4 +43,9 @@ void Renderer::UpdatePerspective(float width, float height)
     auto p = glm::ortho(ratio, -ratio, -1.0f, 1.0f, 1.0f, -1.0f);
     // auto p = glm::ortho(0.0f, width * ratio, 0.0f, height, 0.0f, 100.0f);
     this->projection_matrix = p;
+}
+
+Shader* Renderer::GetShaderRef(ShaderID shader)
+{
+    return &this->shaders.at(shader.id);
 }

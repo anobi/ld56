@@ -14,6 +14,7 @@ public:
     ShaderID AddShader(const char* vertex_path, const char* fragment_path);
     void Draw(std::vector<RenderObject> scene);
     void UpdatePerspective(float width, float height);
+    Shader* GetShaderRef(ShaderID shader);
 private:
     glm::mat4 projection_matrix;
     unsigned int next_id = 1;

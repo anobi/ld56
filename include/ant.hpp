@@ -5,15 +5,8 @@
 
 #include "renderable.hpp"
 #include "shader.hpp"
+#include "agent.hpp"
 #include "goop.hpp"
-
-
-enum AntBehavior
-{
-    WANDER,
-    GOOPING,
-    FLEEING
-};
 
 
 // This was supposed to be an ant game
@@ -45,7 +38,7 @@ private:
     float goop_interest_threshold = 0.5f;
     float goop_min_distance = 0.05f;
     float current_goop_score = 0.0f;
-    AntBehavior current_goal = WANDER;
+    AgentBehavior current_goal = WANDER;
     
     glm::fvec3 wander();
     glm::fvec3 seek(glm::fvec3 location);

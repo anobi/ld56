@@ -16,6 +16,7 @@ struct Character {
 class TextRenderer
 {
 public:
+    TextRenderer() {};
     TextRenderer(unsigned int width, unsigned int height, Shader* shader);
     void LoadFont(const char* font, unsigned int size);
     void Draw(std::string text, glm::fvec2 position, float scale, glm::fvec3 color);

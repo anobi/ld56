@@ -5,16 +5,13 @@
 
 #include "renderable.hpp"
 #include "shader.hpp"
+#include "agent.hpp"
 
-enum BaddieBehavior
-{
-    PROWL,
-    HUNT
-};
 
 class Baddie 
 {
 public:
+    Baddie() {};
     Baddie(MeshID mesh_id, ShaderID shader_id);
     void Update(std::vector<glm::fvec3> goobers);
     void Move(glm::fvec3 new_position);
@@ -33,10 +30,10 @@ public:
 
 private:
     int tick = 0;
-    int aggression_cooldown = 0;
+    int aggression_cooldown_counter = 0;
     float scoop_interest_threshold = 0.5f;
     float scoop_min_distance = 0.05f;
-    BaddieBehavior current_behavior = PROWL;
+    AgentBehavior current_behavior = WANDER;
 
     glm::fvec3 wander();
     glm::fvec3 chase(glm::fvec3 goober);

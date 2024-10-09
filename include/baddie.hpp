@@ -29,7 +29,7 @@ public:
 
 private:
     int tick = 0;
-    int aggression_cooldown = 0;
+    int aggression_cooldown_counter = 0;
     float scoop_interest_threshold = 0.5f;
     float scoop_min_distance = 0.05f;
     AgentBehavior current_behavior = WANDER;

@@ -24,7 +24,7 @@ glm::fvec3 Ant::wander()
     auto world_target = this->position + new_target;
     world_target = glm::clamp(world_target, glm::fvec3(-1.0f, -1.0f, 0.0f), glm::fvec3(1.0f, 1.0f, 0.0f));
 
-    //fmt::println("Goober {} [{}, {}]: wandering to [{}, {}]", this->ID, this->position.x, this->position.y, new_target.x, new_target.y);
+    fmt::println("Goober {} [{}, {}]: wandering to [{}, {}]", this->ID, this->position.x, this->position.y, new_target.x, new_target.y);
 
     return world_target;
 }
@@ -45,7 +45,7 @@ glm::fvec3 Ant::seek(glm::fvec3 goop)
     auto world_target = goop + random_target;
     world_target = glm::clamp(world_target, glm::fvec3(-1.0f, -1.0f, 0.0f), glm::fvec3(1.0f, 1.0f, 0.0f));
 
-    //fmt::println("Goober {} [{}, {}]: chasing goop at [{}, {}]", this->ID, this->position.x, this->position.y, world_target.x, world_target.y);
+    fmt::println("Goober {} [{}, {}]: chasing goop at [{}, {}]", this->ID, this->position.x, this->position.y, world_target.x, world_target.y);
 
     return world_target;
 }
@@ -78,7 +78,7 @@ void Ant::Update(std::vector<Goop*> goops, glm::fvec3 baddie)
     if (distance_to_baddie < BE_EATEN_DISTANCE)
     {
         this->dead = true;
-        //fmt::println("Goober {} was eaten!", this->ID);
+        fmt::println("Goober {} was eaten!", this->ID);
         return;
     }
 

@@ -3,21 +3,31 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
+#include "renderer.hpp"
+#include "text_rendering.hpp"
+
+
 class Game {
 public:
-    Game();
+    Game() {};
     void Run();
-
+    void Init();
 
 private:
     int _tick = 0;
-    // Display _display;
 
     GLFWwindow* _window;
     int _width = 800;
     int _height = 600;
 
+    Renderer _renderer;
+    TextRenderer _text_renderer;
+
     void Update();
     void Draw();
     void Shutdown();
+
+    void load_game();
+
+    //void input_mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 };

@@ -11,6 +11,7 @@
 class Baddie 
 {
 public:
+    Baddie() {};
     Baddie(MeshID mesh_id, ShaderID shader_id);
     void Update(std::vector<glm::fvec3> goobers);
     void Move(glm::fvec3 new_position);

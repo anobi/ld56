@@ -48,6 +48,7 @@ find_package(Freetype REQUIRED)
 target_sources(${PROJECT_NAME}
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/game.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderable.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/text_rendering.cpp

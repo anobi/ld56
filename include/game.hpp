@@ -7,6 +7,17 @@
 #include "text_rendering.hpp"
 
 
+enum GameplayState 
+{
+    ERROR = -1,
+    NONE,
+    NEW_GAME,
+    RUNNING,
+    GAME_OVER,
+    QUIT_GAME
+};
+
+
 class Game {
 public:
     Game() {};
@@ -28,6 +39,7 @@ private:
     void Shutdown();
 
     void load_game();
+    void load_assets();
 
     //void input_mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 };

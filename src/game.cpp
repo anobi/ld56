@@ -10,11 +10,21 @@
 #include "baddie.hpp"
 
 
-Baddie baddie;
-std::vector<Ant> goobers;
-std::vector<Goop> goops;
+GameplayState gameState = GameplayState::NONE;
 ShaderID shader;
+ShaderID text_shader;
+
+Baddie baddie;
+MeshID baddie_mesh;
+
+std::vector<Ant> goobers;
+MeshID goober_mesh;
+int goober_count = 0;
+
+
+std::vector<Goop> goops;
 MeshID goop_mesh;
+
 
 
 void error_callback(int error, const char* description) {
@@ -29,7 +39,12 @@ void input_key_callback(GLFWwindow* window, int key, int scancode, int action, i
 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+        gameState = GameplayState::QUIT_GAME;
+    }
+
+    if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
+    {
+        gameState = GameplayState::NEW_GAME;
     }
 }
 
@@ -45,34 +60,48 @@ void input_mouse_button_callback(GLFWwindow* window, int button, int action, int
         mouse_x = 1 - (mouse_x / 800) * 2.0f;
         mouse_y = 1 - (mouse_y / 600) * 2.0f;
 
-        // auto goop = Goop(goop_mesh, shader, glm::fvec3((float) mouse_x, (float) mouse_y, 0.0f));
-        // goops.push_back(goop);
+        auto goop = Goop(goop_mesh, shader, glm::fvec3((float) mouse_x, (float) mouse_y, 0.0f));
+        goops.push_back(goop);
     }
+}
+
+void Game::load_assets()
+{
+    shader = this->_renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
+
+    text_shader = this->_renderer.AddShader("shaders/text.vert", "shaders/text.frag");
+    this->_text_renderer = TextRenderer(this->_width, this->_height, this->_renderer.GetShaderRef(text_shader));
+    this->_text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 120);
+
+    auto goop_plane = plane_col(glm::fvec3(0.4f, 0.7f, 0.4f));
+    goop_mesh = this->_renderer.AddMesh(goop_plane.vertices, goop_plane.indices);
+
+    auto goober_plane = plane_col(glm::fvec3(0.1f));
+    goober_mesh= this->_renderer.AddMesh(goober_plane.vertices, goober_plane.indices);
+
+    auto baddie_plane = plane_col(glm::fvec3(0.8f, 0.2f, 0.2f));
+    baddie_mesh = this->_renderer.AddMesh(baddie_plane.vertices, baddie_plane.indices);
 }
 
 void Game::load_game()
 {
-    shader = this->_renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
-
-    auto goop_plane = plane_col(glm::fvec3(0.4f, 0.7f, 0.4f));
-    goop_mesh = this->_renderer.AddMesh(goop_plane.vertices, goop_plane.indices);
-    
-    auto ant_plane = plane_col(glm::fvec3(0.1f));
-    auto plane_mesh = this->_renderer.AddMesh(ant_plane.vertices, ant_plane.indices);
+    goobers.clear();
+    goops.clear();
 
     static std::default_random_engine e;
     static std::uniform_real_distribution<> dis(-1.0f, 1.0f);
     for (int i = 0; i < 10; i++) {
-        auto goober = Ant(i+1, plane_mesh, shader);
+        auto goober = Ant(i+1, goober_mesh, shader);
         goober.Move(glm::fvec3(dis(e), dis(e), 0.0f));
         goobers.push_back(goober);
     }
 
-    auto baddie_plane = plane_col(glm::fvec3(0.8f, 0.2f, 0.2f));
-    auto baddie_mesh = this->_renderer.AddMesh(baddie_plane.vertices, baddie_plane.indices);
     baddie = Baddie(baddie_mesh, shader);
     baddie.Move(glm::fvec3(dis(e), dis(e), 0.0f));
+
+    goober_count = goobers.size();
 }
+
 
 void Game::Init()
 {
@@ -94,38 +123,52 @@ void Game::Init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 
+    glfwSetWindowShouldClose(this->_window, GLFW_FALSE);
+
     // Input setup
     glfwSetKeyCallback(this->_window, input_key_callback);
     glfwSetMouseButtonCallback(this->_window, input_mouse_button_callback);
-
-    auto text_shader = this->_renderer.AddShader("shaders/text.vert", "shaders/text.frag");
-    this->_text_renderer = TextRenderer(this->_width, this->_height, this->_renderer.GetShaderRef(text_shader));
-    this->_text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 120);
 }
 
-void Game::Run() 
+void Game::Run()
 {
-    // Load game data / state
-    this->load_game();
+
+    load_assets();
+
+    // Set gamestate to load game data
+    gameState = GameplayState::NEW_GAME;
 
     float delta_time = 0.0f;
     float last_frame = 0.0f;
-    auto running = true;
-    auto goober_count = goobers.size();
-    auto game_over = false;
-    while (!glfwWindowShouldClose(this->_window)/*running*/) {
-
-        this->Update();
-
-        auto scene = std::vector<RenderObject>();
-
-        if (!game_over)
+    while (!glfwWindowShouldClose(this->_window)/*running*/) 
+    {
+        if (gameState == GameplayState::QUIT_GAME)
         {
+            glfwSetWindowShouldClose(this->_window, GLFW_TRUE);
+            continue;
+        }
+
+        // Load the game
+        if (gameState == GameplayState::NEW_GAME) {
+            this->load_game();
+            gameState = GameplayState::RUNNING;
+            continue;
+        }
+
+        // TODO: Separate into display update or start rendering or something
+        this->Update();
+        
+        if (gameState == GameplayState::RUNNING)
+        {
+            // TODO: Renderer should have hold this data?
+            //       And then delete on demand instead of recreating on every frame.
+            auto render_scene = std::vector<RenderObject>();
+
             auto goopies = std::vector<Goop*>();
             for (auto &goop : goops) 
             {
                 goop.Update(delta_time);
-                scene.push_back(goop.render_obj);
+                render_scene.push_back(goop.render_obj);
                 goopies.push_back(&goop);
             }
 
@@ -133,12 +176,12 @@ void Game::Run()
             for (auto &goobie : goobers) 
             {
                 goobie.Update(goopies, baddie.position);
-                scene.push_back(goobie.render_obj);
+                render_scene.push_back(goobie.render_obj);
                 goober_locations.push_back(goobie.position);
             }
 
             baddie.Update(goober_locations);
-            scene.push_back(baddie.render_obj);
+            render_scene.push_back(baddie.render_obj);
 
             // Clear dead goops
             for (int i = 0; i < goops.size(); i++) {
@@ -156,21 +199,19 @@ void Game::Run()
                 }
             }
             goober_count = goobers.size();
-            if (goober_count <= 0) 
+            if (goober_count <= 0)
             {
-                game_over = true;
+                gameState = GameplayState::GAME_OVER;
             }
+
+            this->_renderer.Draw(render_scene);
+            auto l_score = fmt::format("Goobers alive: {}", goober_count);
+            this->_text_renderer.Draw(l_score, glm::fvec2(10.0f, 10.0f), 0.25f, glm::fvec3(0.1f));
         }
-
-
-        this->_renderer.Draw(scene);
-
-        auto l_score = fmt::format("Goobers alive: {}", goober_count);
-        this->_text_renderer.Draw(l_score, glm::fvec2(10.0f, 10.0f), 0.25f, glm::fvec3(0.1f));
-
-        if (game_over) // Game over
+        else if (gameState == GameplayState::GAME_OVER) // Game over
         {
             this->_text_renderer.Draw("Game Over!", glm::fvec2(120.0f, 250.0f), 1.0f, glm::fvec3(0.1f));
+            this->_text_renderer.Draw("Press F1 to restart, ESC to quit", glm::fvec2(200.0f, 400.0f), 0.25f, glm::fvec3(0.1f));
             fmt::println("All goobers eaten! Game Over!");
         }
 

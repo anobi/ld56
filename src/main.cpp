@@ -1,15 +1,3 @@
-#include <cstdio>
-#include <cstddef>
-
-
-#include <glad/gl.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <fmt/core.h>
-
 #include "game.hpp"
 
 

@@ -1,5 +1,6 @@
 #include "game.hpp"
 
+#include <chrono>
 #include <random>
 #include <fmt/core.h>
 
@@ -68,11 +69,7 @@ void input_mouse_button_callback(GLFWwindow* window, int button, int action, int
 void Game::load_assets()
 {
     shader = this->_renderer.AddShader("shaders/basic.vert", "shaders/basic.frag");
-
-    text_shader = this->_renderer.AddShader("shaders/text.vert", "shaders/text.frag");
-    this->_text_renderer = TextRenderer(this->_width, this->_height, this->_renderer.GetShaderRef(text_shader));
-    this->_text_renderer.LoadFont("assets/Tiny5-Regular.ttf", 120);
-
+    
     auto goop_plane = plane_col(glm::fvec3(0.4f, 0.7f, 0.4f));
     goop_mesh = this->_renderer.AddMesh(goop_plane.vertices, goop_plane.indices);
 
@@ -128,6 +125,8 @@ void Game::Init()
     // Input setup
     glfwSetKeyCallback(this->_window, input_key_callback);
     glfwSetMouseButtonCallback(this->_window, input_mouse_button_callback);
+
+    this->_renderer.Init(this->_width, this->_height);
 }
 
 void Game::Run()
@@ -160,7 +159,7 @@ void Game::Run()
         
         if (gameState == GameplayState::RUNNING)
         {
-            // TODO: Renderer should have hold this data?
+            // TODO: Renderer should hold this data?
             //       And then delete on demand instead of recreating on every frame.
             auto render_scene = std::vector<RenderObject>();
 
@@ -206,12 +205,12 @@ void Game::Run()
 
             this->_renderer.Draw(render_scene);
             auto l_score = fmt::format("Goobers alive: {}", goober_count);
-            this->_text_renderer.Draw(l_score, glm::fvec2(10.0f, 10.0f), 0.25f, glm::fvec3(0.1f));
+            this->_renderer.DrawText(l_score, glm::fvec2(10.0f, 10.0f), 0.25f, glm::fvec3(0.1f));
         }
         else if (gameState == GameplayState::GAME_OVER) // Game over
         {
-            this->_text_renderer.Draw("Game Over!", glm::fvec2(120.0f, 250.0f), 1.0f, glm::fvec3(0.1f));
-            this->_text_renderer.Draw("Press F1 to restart, ESC to quit", glm::fvec2(200.0f, 400.0f), 0.25f, glm::fvec3(0.1f));
+            this->_renderer.DrawText("Game Over!", glm::fvec2(120.0f, 250.0f), 1.0f, glm::fvec3(0.1f));
+            this->_renderer.DrawText("Press F1 to restart, ESC to quit", glm::fvec2(200.0f, 400.0f), 0.25f, glm::fvec3(0.1f));
             fmt::println("All goobers eaten! Game Over!");
         }
 

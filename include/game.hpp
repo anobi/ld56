@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 
 #include "renderer.hpp"
-#include "text_rendering.hpp"
 
 
 enum GameplayState 
@@ -32,7 +31,6 @@ private:
     int _height = 600;
 
     Renderer _renderer;
-    TextRenderer _text_renderer;
 
     void Update();
     void Draw();

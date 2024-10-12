@@ -108,6 +108,10 @@ void Game::Init()
 
     glfwSetErrorCallback(error_callback);
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     this->_window = glfwCreateWindow(this->_width, this->_height, "LD56 - Goop and Goobers", NULL, NULL);
     if (!this->_window) {
         glfwTerminate();

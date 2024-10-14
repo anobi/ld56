@@ -1,11 +1,9 @@
 #include "game.hpp"
 
-#include <chrono>
 #include <random>
 #include <fmt/core.h>
 
 #include "primitives.hpp"
-#include "shader.hpp"
 #include "ant.hpp"
 #include "goop.hpp"
 #include "baddie.hpp"
